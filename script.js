@@ -57,26 +57,53 @@ class Tree{
             if(tree.right !=null & tree.left !=null){
                 if(tree.right.left == null){
                     tree.data = tree.right.data;
-                    tree.right =tree.right.right;
+                    tree.right =null;
+                    return 
+                  
                 } 
-                if(tree.right.left !=null){ // doesnt work 
+                if(tree.right.left !== null){ 
                     
                     let n = tree.right.left
-                    while (n != null) {
-                        n= n.left
+                 
+                    let parentRem = tree.right;
+            
+                    while (n.left != null) {
+                        if(n.left != null){
+                            parentRem = n;
+                            n = n.left
+                        }
                     }
-                    console.log(n)
-                    // while doesn't traverse properly
+                    tree.data = n.data;
+                    parentRem.left = null;
+              
+                    return
+                   
                 }
             }
             if(tree.right != null || tree.left !=null){
+                let childNode=null;
+                let parent = stack[stack.length-1];
+                let parentLink=null;
+                parent.right == tree.data? parentLink = parent.right: parentLink= parent.left;
+                if(tree.right != null){
+                    childNode= tree.right;
+                    tree.right = null;
+                    parentLink = childNode;
+                }
+                else{
+                    childNode= tree.left;
+                    tree.left = null;
+                    parentLink =childNode;
+                }
+                tree.data = childNode.data
+
+                return
 
             }
             if(tree.right == null && tree.left == null){
+                //prev needs to be changed to stack
                 for(let i =0; i<stack.length;i++){
                     let node = stack[i];
-                    console.log(node.right)
-                    console.log(node.left)
                 }
                 if(prev.left != null && Object.values(prev.left).includes(value)){
                     prev.left = null
@@ -94,6 +121,18 @@ class Tree{
             stack.push(tree);
             return this.deleteItem(value,tree.left,tree,stack)
         }
+    }
+    find(value,tree){
+        if(value == tree.data){
+            return tree
+        }
+        if(value > tree.data & tree.right !=null){
+            return this.find(value,tree.right)
+        }
+        if(value < tree.data & tree.left !=null){
+            return this.find(value,tree.left);
+        }
+        return 'not found'
     }
 }
 let test = new Tree([5,99,2,2,2,2,2,2,2,2,2,28,7,7,7]);
@@ -115,10 +154,14 @@ test.insert(1,test.root);
 test.insert(22,test.root);
 test.insert(18,test.root);
 test.insert(24,test.root);
+test.insert(17,test.root);
+test.insert(17.8,test.root);
 test.insert(3,test.root);
 test.insert(6,test.root);
+test.insert(23,test.root);
 //console.log(test.root);
 prettyPrint(test.root);
-test.deleteItem(7,test.root);
+test.deleteItem(2,test.root);
 prettyPrint(test.root);
+console.log(test.find(3,test.root))
 
