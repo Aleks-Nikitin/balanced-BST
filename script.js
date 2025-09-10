@@ -134,6 +134,19 @@ class Tree{
         }
         return 'not found'
     }
+    levelOrderForEach(){
+        // review how it could be done with with callback as an argument;
+        let result = [];
+        let queue = [this.root];
+        while(queue.length >0){
+            let current = queue[0];
+            if(current.left) queue.push(current.left);
+            if(current.right) queue.push(current.right);
+            result.push(current);
+            queue.shift()
+        }
+        return result;
+    }
 }
 let test = new Tree([5,99,2,2,2,2,2,2,2,2,2,28,7,7,7]);
 const prettyPrint = (node, prefix = '', isLeft = true) => {
@@ -160,8 +173,9 @@ test.insert(3,test.root);
 test.insert(6,test.root);
 test.insert(23,test.root);
 //console.log(test.root);
+//prettyPrint(test.root);
+//test.deleteItem(2,test.root);
 prettyPrint(test.root);
-test.deleteItem(2,test.root);
-prettyPrint(test.root);
-console.log(test.find(3,test.root))
+//console.log(test.find(3,test.root))
+console.log(test.levelOrderForEach());
 
