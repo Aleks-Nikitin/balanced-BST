@@ -3,7 +3,6 @@ class Node{
         this.data = data;
         this.right=null;
         this.left = null;
-        
     }
 }
 class Tree{
@@ -134,10 +133,10 @@ class Tree{
         }
         return 'not found'
     }
-    levelOrderForEach(){
+    levelOrderForEach(node){
         // review how it could be done with with callback as an argument;
         let result = [];
-        let queue = [this.root];
+        let queue = [node];
         while(queue.length >0){
             let current = queue[0];
             if(current.left) queue.push(current.left);
@@ -147,8 +146,55 @@ class Tree{
         }
         return result;
     }
+    inOrderForEach(node,result=[]){
+        
+        if(node ==null || node == undefined) return 
+        this.inOrderForEach(node.left,result)
+        result.push(node);
+        this.inOrderForEach(node.right,result)
+       return result
+    }
+    postOrderForEach(node,result=[]){
+        if(node == null || node == undefined) return
+        this.postOrderForEach(node.left,result);
+        this.postOrderForEach(node.right, result);
+        result.push(node);
+        return result
+    }
+    preOrderForEach(node,result=[]){
+       
+        if(node == null || node == undefined) return
+        result.push(node);
+        this.preOrderForEach(node.left,result);
+        this.preOrderForEach(node.right, result);
+        return result
+    }
+    height(value,queue=[[this.find(value,this.root)]],current=0){
+        let root= this.find(value,this.root); 
+        if(root.data ==null) return 0
+        if(root.right == null && root.left ==null) return 0
+        current++;
+       if(root.right != null || root.left != null){
+            queue[current]=[];// empties array that contains previous value
+                                // so not all values are there in the end
+            if(root.left !=null){
+                queue[current].push(root.left)
+                this.height(root.left.data,queue,current)
+            }
+            if(root.right!=null){
+                queue[current].push(root.right)
+                this.height(root.right.data,queue,current)
+            }
+       }
+       return queue.length-1
+    }
+    depth(value){
+        let rootHeight = this.height(this.root.data);
+        let elemHeight = this.height(value);
+        return rootHeight - elemHeight;
+    }
 }
-let test = new Tree([5,99,2,2,2,2,2,2,2,2,2,28,7,7,7]);
+let test = new Tree([1, 2, 3, 4, 5, 6, 7]);
 const prettyPrint = (node, prefix = '', isLeft = true) => {
   if (node === null) {
     return;
@@ -161,21 +207,6 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
     prettyPrint(node.left, `${prefix}${isLeft ? '    ' : '│   '}`, true);
   }
 };
-//console.log(test.root);
-//prettyPrint(test.root)
-test.insert(1,test.root);
-test.insert(22,test.root);
-test.insert(18,test.root);
-test.insert(24,test.root);
-test.insert(17,test.root);
-test.insert(17.8,test.root);
-test.insert(3,test.root);
-test.insert(6,test.root);
-test.insert(23,test.root);
-//console.log(test.root);
-//prettyPrint(test.root);
-//test.deleteItem(2,test.root);
+test.insert(0,test.root)
 prettyPrint(test.root);
-//console.log(test.find(3,test.root))
-console.log(test.levelOrderForEach());
-
+console.log(test.depth(0));
