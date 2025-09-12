@@ -170,6 +170,7 @@ class Tree{
         return result
     }
     height(value,queue=[[this.find(value,this.root)]],current=0){
+        // value needs to be changed because i could just pass whole node
         let root= this.find(value,this.root); 
         if(root.data ==null) return 0
         if(root.right == null && root.left ==null) return 0
@@ -188,10 +189,58 @@ class Tree{
        }
        return queue.length-1
     }
-    depth(value){
-        let rootHeight = this.height(this.root.data);
-        let elemHeight = this.height(value);
-        return rootHeight - elemHeight;
+    depth(value,node,depthCounter=0,result){
+       if(depthCounter == 0) {
+        node =this.find(value,this.root);
+        result = this.preOrderForEach(this.root);
+        if(!(result.includes(node))) return node;
+       }
+        for(let i=0;i<result.length;i++){
+            let element = result[i];
+            if(element.right == node|| element.left == node){
+                depthCounter++;
+                return this.depth(element.data,element,depthCounter,result)
+            }
+        }
+        return depthCounter;
+       
+    }
+    isBalanced(node=this.root){
+        if(node == null || node ==undefined) return
+        let rightH=0;
+        let leftH=0;
+        if(node.right !=null){
+            rightH= this.height(node.right.data);
+        }
+        if(node.left !=null){
+            leftH= this.height(node.left.data);
+        }
+            let diffH =Math.max((leftH-rightH),(rightH-leftH));
+        
+        if( diffH ==0|| diffH ==1 ){
+            if(node.left!= null){
+                return this.isBalanced(node.left);
+            }
+            if(node.right!=null){
+                return this.isBalanced(node.right);
+            }
+            return true
+        }else{
+            return false
+        }
+    }
+    rebalance(){
+        let nodes = this.preOrderForEach(this.root);
+        let nodesVal=[];
+        nodes.forEach(element => {
+            nodesVal.push(element.data);
+        });
+        function compareNumbers(a,b){
+            return a-b;
+        }
+        nodesVal.sort(compareNumbers);
+        this.root = this.buildTree(nodesVal,0,nodesVal.length-1);
+            
     }
 }
 let test = new Tree([1, 2, 3, 4, 5, 6, 7]);
@@ -207,6 +256,4 @@ const prettyPrint = (node, prefix = '', isLeft = true) => {
     prettyPrint(node.left, `${prefix}${isLeft ? '    ' : '│   '}`, true);
   }
 };
-test.insert(0,test.root)
-prettyPrint(test.root);
-console.log(test.depth(0));
+
