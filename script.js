@@ -12,18 +12,11 @@ class Tree{
         this.root = this.buildTree(this.arr,0,this.arr.length-1);
     }
     initialSort(){
-         for (let i = 0; i < this.arr.length; i++) {
-            const element = this.arr[i];
-            if(this.arr.indexOf(element) != this.arr.lastIndexOf(element)){
-                this.arr.splice(i,1);
-                i=-1;
-            }
-            function compareNumbers(a,b){
+        this.arr = [...new Set(this.arr)] // removes duplicates
+        function compareNumbers(a,b){
             return a-b;
         }
-            this.arr.sort(compareNumbers);
-                
-            }
+        this.arr.sort(compareNumbers);
         }
     buildTree(array,start,end){
         if(start>end) return null
@@ -34,93 +27,44 @@ class Tree{
         return  root;
 
     }
-    insert(value,tree){
-        if(value > tree.data & tree.right !=null){
-            return this.insert(value,tree.right)
+    insert(value,tree=this.root){
+        if(tree == null){
+            tree = new Node(value);
+            return tree
         }
-        if(value < tree.data & tree.left !=null){
-            return this.insert(value,tree.left)
+        if(value < tree.data){
+            tree.left = this.insert(value,tree.left);
         }
-        if(value > tree.data & tree.right ==null){
-            return tree.right = new Node(value);
+        else if(value > tree.data){
+            tree.right = this.insert(value,tree.right)
         }
-        if(value < tree.data & tree.left ==null){
-            return tree.left = new Node(value);
-            
-        }
-
+        return tree
     }
-    deleteItem(value,tree,prev,stack=[]){
-        // prev needs to be removed cuz there is stack for it
-        if(value == tree.data){
-            if(tree.right !=null & tree.left !=null){
-                if(tree.right.left == null){
-                    tree.data = tree.right.data;
-                    tree.right =null;
-                    return 
-                  
-                } 
-                if(tree.right.left !== null){ 
-                    
-                    let n = tree.right.left
-                 
-                    let parentRem = tree.right;
-            
-                    while (n.left != null) {
-                        if(n.left != null){
-                            parentRem = n;
-                            n = n.left
-                        }
-                    }
-                    tree.data = n.data;
-                    parentRem.left = null;
-              
-                    return
-                   
-                }
-            }
-            if(tree.right != null || tree.left !=null){
-                let childNode=null;
-                let parent = stack[stack.length-1];
-                let parentLink=null;
-                parent.right == tree.data? parentLink = parent.right: parentLink= parent.left;
-                if(tree.right != null){
-                    childNode= tree.right;
-                    tree.right = null;
-                    parentLink = childNode;
-                }
-                else{
-                    childNode= tree.left;
-                    tree.left = null;
-                    parentLink =childNode;
-                }
-                tree.data = childNode.data
+    delete(data, node = this.root) {
+    if (node == null) return node;
 
-                return
+    if (data < node.data) node.left = this.delete(data, node.left);
+    else if (data > node.data) node.right = this.delete(data, node.right);
+    else {
+      // node with only one child or no child
+      if (node.left == null) return node.right;
+      if (node.right == null) return node.left;
 
-            }
-            if(tree.right == null && tree.left == null){
-                //prev needs to be changed to stack
-                for(let i =0; i<stack.length;i++){
-                    let node = stack[i];
-                }
-                if(prev.left != null && Object.values(prev.left).includes(value)){
-                    prev.left = null
-                    return
-                }
-                prev.right = null
-                return
-            }
-        }
-        if(value > tree.data & tree.right !=null){
-            stack.push(tree);
-            return this.deleteItem(value,tree.right,tree,stack)
-        }
-        if(value < tree.data & tree.left !=null){
-            stack.push(tree);
-            return this.deleteItem(value,tree.left,tree,stack)
-        }
+      // node with two children
+      node.data = this.minValue(node.right);
+      node.right = this.delete(node.data, node.right);
     }
+    return node;
+  }
+
+  minValue(node) {
+    let minv = node.data;
+    while (node.left != null) {
+      minv = node.left.data;
+      node = node.left;
+    }
+    return minv;
+  }
     find(value,tree){
         if(value == tree.data){
             return tree
@@ -169,42 +113,21 @@ class Tree{
         this.preOrderForEach(node.right, result);
         return result
     }
-    height(value,queue=[[this.find(value,this.root)]],current=0){
-        // value needs to be changed because i could just pass whole node
-        let root= this.find(value,this.root); 
-        if(root.data ==null) return 0
-        if(root.right == null && root.left ==null) return 0
-        current++;
-       if(root.right != null || root.left != null){
-            queue[current]=[];// empties array that contains previous value
-                                // so not all values are there in the end
-            if(root.left !=null){
-                queue[current].push(root.left)
-                this.height(root.left.data,queue,current)
-            }
-            if(root.right!=null){
-                queue[current].push(root.right)
-                this.height(root.right.data,queue,current)
-            }
-       }
-       return queue.length-1
+    height(node){
+        if(typeof node == 'number') node = this.find(node,this.root)
+      if(node == null){
+        return 0
+      }
+      let leftH = this.height(node.left);
+      let rightH = this.height(node.right);
+      return Math.max(leftH,rightH)+1
     }
-    depth(value,node,depthCounter=0,result){
-       if(depthCounter == 0) {
-        node =this.find(value,this.root);
-        result = this.preOrderForEach(this.root);
-        if(!(result.includes(node))) return node;
-       }
-        for(let i=0;i<result.length;i++){
-            let element = result[i];
-            if(element.right == node|| element.left == node){
-                depthCounter++;
-                return this.depth(element.data,element,depthCounter,result)
-            }
-        }
-        return depthCounter;
-       
-    }
+    depth(data, node = this.root) {
+    if(typeof data == 'number') data = this.find(data,this.root)
+    if (node.data === data.data) return 0;
+    if (data.data < node.data) return this.depth(data, node.left) + 1;
+    if (data.data > node.data) return this.depth(data, node.right) + 1;
+  }
     isBalanced(node=this.root){
         if(node == null || node ==undefined) return
         let rightH=0;
@@ -215,7 +138,7 @@ class Tree{
         if(node.left !=null){
             leftH= this.height(node.left.data);
         }
-            let diffH =Math.max((leftH-rightH),(rightH-leftH));
+            let diffH =Math.abs((rightH-leftH));
         
         if( diffH ==0|| diffH ==1 ){
             if(node.left!= null){
